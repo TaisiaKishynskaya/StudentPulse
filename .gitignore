@@ -426,3 +426,49 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+
+# ===================================================
+# Custom additions for StudentPulse / StudentTracker
+# ===================================================
+
+# --- React + Vite (StudentPulse.Client) ---
+# Vite build output
+dist/
+dist-ssr/
+test-results/
+
+# NPM / Yarn / PNPM logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ESLint cache
+.eslintcache
+
+# Vite environment variables (local overrides with secrets)
+.env*.local
+
+# --- Azure Functions (StudentPulse.Notifications) ---
+# CRITICAL: Contains local secrets, connection strings, and keys
+local.settings.json
+
+# --- .NET Aspire & Local API Configuration ---
+# Local settings that shouldn't be committed
+appsettings.Local.json
+appsettings.*.Local.json
+.aspire/
+
+# --- Local Databases / Docker Volumes ---
+# Ignore local data folders if you map MongoDB/Kafka volumes inside the repo
+.data/
+data/
+docker-volumes/
+*.db
+
+# --- OS-specific ---
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db

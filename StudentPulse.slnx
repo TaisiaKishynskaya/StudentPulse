@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="StudentPulse.Api/StudentPulse.Api.csproj" />
+  <Project Path="StudentPulse.AppHost/StudentPulse.AppHost.csproj" />
+  <Project Path="StudentPulse.Notifications/StudentPulse.Notifications.csproj" />
+  <Project Path="StudentPulse.ServiceDefaults/StudentPulse.ServiceDefaults.csproj" />
+</Solution>
