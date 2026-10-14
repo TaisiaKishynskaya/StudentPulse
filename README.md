@@ -3,7 +3,6 @@ StudentPulse is an application where an instructor creates students and updates 
 
 ## 🔄 High-Level Architecture & Data Flow
 All infrastructure components, databases, and message brokers are orchestrated locally via **.NET Aspire** for a seamless one-click startup.
-
 ```text
                    ┌─────────────────┐
                    │      React      │
@@ -31,6 +30,15 @@ All infrastructure components, databases, and message brokers are orchestrated l
 
              Everything runs through Aspire
 ```
+
+## 🎨 This project brings together a set of modern architectural patterns.
+* **Vertical Slice Architecture (VSA)** — all backend code is grouped by business features rather than technical layers.
+* **Event-Driven Architecture (EDA)** — when the API state changes, it does not synchronously call third-party services but instead publishes domain events to a Kafka message bus.
+* **Lightweight CQRS / CQS (Command Query Separation)** - within vertical slices, the logic is clearly separated into Commands (write/modify) and Queries (read).
+* **Mediator Pattern (через Wolverine)** — an HTTP request arrives at a Minimal API (or controller), which simply takes the request object and tells Wolverine: "Find someone who knows how to handle this." Wolverine locates the appropriate handler in the folder and passes the request to it.
+* **Repository Pattern + Strategy Pattern** — the Infrastructure\Storage hides DB details behind a common IStudentRepository interface to keep the slice code clean. The Settings page uses the Strategy pattern to dynamically switch between MongoStudentRepository and CosmosStudentRepository. As a result, the feature slice simply calls _repository.DeleteAsync(id) without caring which database is currently active — the infrastructure layer intercepts the call and seamlessly routes it to either MongoDB or Cosmos DB.
+* **Serverless Computing / Background Offloading** — the StudentPulse.Notifications project, based on Azure Functions, operates as an isolated event handler.
+
 
 ## 🏗 Project Structure (Vertical Slice Architecture)
 The project is organized following the principles of Vertical Slice Architecture (VSA). Instead of the traditional separation into technical layers (controllers, services, repositories), the code is grouped by specific business scenarios.
@@ -88,7 +96,7 @@ The project is organized following the principles of Vertical Slice Architecture
                     └── StorageChanged.cs        # 📦 (Optional) Audit event for Kafka, if a change in settings needs to be recorded.
 
 ```
-### Core Components
+### 🧩 Core Components
 * **StudentPulse.AppHost (The Conductor):** This is the single entry point for launching the entire system. It reads `Program.cs`, understands the dependencies, and spins up the entire local infrastructure with a single click.
 * **StudentPulse.ServiceDefaults (The Life Support System):** An auxiliary .NET Aspire project that acts as a "medic" and "spy" for the services. It automatically injects base configurations (Health Checks and OpenTelemetry) into the API. Thanks to this project, the Aspire dashboard can draw beautiful call graphs and display service statuses.
 * **StudentPulse.Frontend (The React Client):** This is where the UI is rendered. The frontend doesn't compute anything itself or interact with the database—it only draws the interface and sends HTTP requests to the API.
