@@ -6,43 +6,52 @@ The project is organized following the principles of Vertical Slice Architecture
 ```text
 📁 StudentPulse.sln
 │
-├── 📁 StudentTracker.AppHost          # Aspire project to run the entire infrastructure
-│    └── Program.cs                    # Configures the startup for API, React, MongoDB, Kafka, and Azure Function
+├── 📁 StudentPulse.AppHost          # Aspire project to run the entire infrastructure
+│    └── Program.cs                   # Configures the startup for API, React, MongoDB, Kafka, and Azure Function
 │
-├── 📁 StudentTracker.ServiceDefaults  # Standard Aspire project (Telemetry, HealthChecks)
+├── 📁 StudentPulse.ServiceDefaults  # Standard Aspire project (Telemetry, HealthChecks)
 │
-├── 📁 StudentTracker.Frontend         # React + TypeScript + Vite + Material UI
+├── 📁 StudentPulse.Frontend         # React + TypeScript + Vite + Material UI
 │    ├── 📁 src
-│    │    ├── 📁 components            # Table, Dialog, Button, Select (MUI)
-│    │    └── 📁 pages                 # Login, Students, Settings
+│    │    ├── 📁 components          # Table, Dialog, Button, Select (MUI)
+│    │    └── 📁 pages               # Login, Students, Settings
 │    └── package.json
 │
-├── 📁 StudentTracker.Notifications    # Azure Functions project
-│    ├── StudentCreatedFunction.cs     # Listens to Kafka and sends notifications to Google Chat and Email
+├── 📁 StudentPulse.Notifications    # Azure Functions project
+│    ├── StudentCreatedFunction.cs    # Listens to Kafka and sends notifications to Google Chat and Email
 │    └── host.json
 │
-└── 📁 StudentTracker.Api              # ASP.NET Web API project
+└── 📁 StudentPulse.Api              # ASP.NET Web API project
      │
-     ├── 📁 Infrastructure             # Technical configurations
-     │    ├── 📁 Auth                  # Identity settings (Microsoft Entra / Auth0) and Admin / Teacher roles
-     │    ├── 📁 Storage               # Implementations for MongoStudentRepository and CosmosStudentRepository
-     │    └── 📁 Messaging             # Wolverine connection settings for Kafka
+     ├── 📁 Infrastructure           # Technical configurations
+     │    ├── 📁 Auth                # Identity settings (Microsoft Entra / Auth0) and Admin / Teacher roles
+     │    ├── 📁 Storage             # Implementations for MongoStudentRepository and CosmosStudentRepository
+     │    └── 📁 Messaging           # Wolverine connection settings for Kafka
      │
-     └── 📁 Features                   # Vertical Slices (VSA)
+     └── 📁 Features                 # Vertical Slices (VSA)
           │
-          ├── 📁 Students              # Slices for the Student entity
+          ├── 📁 Students            # Slices for the Student entity
           │    │
           │    ├── 📁 Create
           │    │    └── CreateStudent.cs    # (Command + Handler). Validates, saves to DB, sends StudentCreated event
+          │    │    └── StudentCreated.cs   # 📦 Event model for Kafka
           │    │
           │    ├── 📁 GetList
           │    │    └── GetStudents.cs      # (Query + Handler). Simply reads the list of students from DB (Active / Graduated / Dropped)
+          │    ├── 📁 GetById
+          │    │    └── GetStudent.cs       # (Query + Handler). Reads a single student from DB by ID
           │    │
           │    ├── 📁 Delete
           │    │    └── DeleteStudent.cs    # (Command + Handler). Checks Admin role, deletes from DB, sends StudentDeleted to Kafka
+          │    │    └── StudentDeleted.cs       # 📦 Event model for Kafka
           │    │
           │    └── 📁 Update
           │         └── UpdateStudent.cs    # Updates the student's Status or Score
+          │         └── StudentStatusChanged.cs   # 📦 Event model for Kafka (record)
+          │         └── StudentScoreChanged.cs    # 📦 Event model for Kafka (record)
+          │         └── StudentProfileUpdated.cs  # 📦 Event model for  Kafka (record)
           │
           └── 📁 Settings
                └── 📁 ChangeStorage
+                    ├── ChangeStorage.cs    # (Command + Handler). Accepts an HTTP request and switches the active database provider.
+                    └── StorageChanged.cs   # 📦 (Optionaly) Audit event for Kafka, if a change in settings needs to be recorded.
